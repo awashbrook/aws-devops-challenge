@@ -2,7 +2,7 @@ output "vpc_id" {
   description = "The ID of the VPC"
   value       = module.vpc_application.vpc_id
 }
-output "internet_gateway_id" {
+output "igw_id" {
   description = "The ID of the Internet Gateway"
   value       = module.vpc_application.igw_id
 }
