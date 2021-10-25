@@ -28,7 +28,6 @@ module "vpc_application" {
     Role        = "app-vpc"
   }
 }
-
 module "ec2-application-instance" {
   source  = "terraform-aws-modules/ec2-instance/aws"
   version = "~> 3.0"
@@ -40,7 +39,7 @@ module "ec2-application-instance" {
   # the public SSH key
   key_name               = aws_key_pair.mykeypair.key_name
   monitoring             = true
-  vpc_security_group_ids = ["sg-12345678"] # # TODO Default SG?
+  vpc_security_group_ids = [aws_security_group.app_instance_private.id]
   subnet_id              = module.vpc_application.private_subnets[0]
 
   tags = {
@@ -49,6 +48,43 @@ module "ec2-application-instance" {
     Project     = var.app_tag
     Version     = "0.1.0"
     Role        = "app-instance"
+  }
+}
+resource "aws_security_group" "example-instance" {
+  vpc_id      = module.vpc_application.vpc_id
+  name        = "allow-ssh"
+  description = "security group that allows ssh and all egress traffic"
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [var.WORKSTATION_CIDR_BLOCK]
+  }
+}
+
+
+resource "aws_security_group" "app_instance_private" {
+  vpc_id = module.vpc_application.vpc_id
+  name   = "${var.app_tag}-${var.environment}-app-instance-sg"
+  ingress {
+    from_port       = 8080
+    to_port         = 8080
+    protocol        = "tcp"
+    security_groups = [aws_security_group.example-instance.id] # allowing access from our example instance
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+    self        = true
   }
 }
 
