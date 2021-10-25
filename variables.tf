@@ -1,3 +1,4 @@
+variable "WORKSTATION_CIDR_BLOCK" {}
 variable "AWS_REGION" {
   default = "eu-west-1"
 }
@@ -13,4 +14,24 @@ variable "vpc_cidr_application" {
 variable "vpc_cidr_bastion" {
   default = "172.168.0.0/16"
 }
-variable "workstation_cidr" {}
+variable "AMIS" {
+  type = map(string)
+  default = { # Amazon Linux 2
+    eu-west-1 = "ami-05cd35b907b4ffe77"
+  }
+}
+# Free Tier Eligible 
+variable "instance_type" {
+  default = "t2.micro"
+  # TODO default = "t3.nano"
+}
+variable "PATH_TO_PRIVATE_KEY" {
+  default = "~/.ssh/mykey"
+}
+variable "PATH_TO_PUBLIC_KEY" {
+  default = "~/.ssh/mykey.pub"
+}
+variable "INSTANCE_USERNAME" {
+  default = "ec2-user"
+}
+
