@@ -24,8 +24,8 @@ variable "AMIS" {
 }
 # Free Tier Eligible 
 variable "instance_type" {
-  default = "t2.micro"
-  # TODO default = "t3.nano"
+  # default = "t2.micro"
+  default = "t3.nano"
 }
 variable "PATH_TO_PRIVATE_KEY" {
   default = "~/.ssh/mykey"

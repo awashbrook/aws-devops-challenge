@@ -6,6 +6,9 @@ locals {
     Version     = "0.1.0"
   }
 }
+data "aws_availability_zones" "available" {
+  state = "available"
+}
 module "vpc_application" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "~>3.10"
@@ -13,7 +16,7 @@ module "vpc_application" {
   name = "${var.app_tag}-${var.environment}-vpc"
   cidr = var.vpc_cidr_application
 
-  azs             = ["eu-west-2a", "eu-west-2b", "eu-west-2c"] # TODO AZ from Data Source
+  azs             = slice(data.aws_availability_zones.available.names, 0, 3) # First 3 Available AZs in Region 
   private_subnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
   public_subnets  = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
 
