@@ -23,13 +23,9 @@ module "vpc_application" {
   enable_nat_gateway = false
   enable_vpn_gateway = false
 
-  tags = {
-    Terraform   = "true"
-    Environment = var.environment
-    Project     = var.app_tag
-    Version     = "0.1.0"
-    Role        = "app-vpc"
-  }
+  tags = merge(local.preparedTags, {
+    Role = "app-vpc"
+  })
 }
 module "ec2-application-instance" {
   source  = "terraform-aws-modules/ec2-instance/aws"
@@ -44,13 +40,9 @@ module "ec2-application-instance" {
   subnet_id              = module.vpc_application.private_subnets[0]
   user_data              = data.template_cloudinit_config.cloudinit-app-instance.rendered
 
-  tags = {
-    Terraform   = "true"
-    Environment = var.environment
-    Project     = var.app_tag
-    Version     = "0.1.0"
-    Role        = "app-instance"
-  }
+  tags = merge(local.preparedTags, {
+    Role = "app-instance"
+  })
 }
 module "web_server_sg" {
   source  = "terraform-aws-modules/security-group/aws//modules/http-80"
@@ -63,6 +55,10 @@ module "web_server_sg" {
   ingress_cidr_blocks = [var.WORKSTATION_CIDR_BLOCK]
 
   ingress_rules = ["ssh-tcp"]
+
+  tags = merge(local.preparedTags, {
+    Role = "web-server"
+  })
 }
 module "app_instance_private" {
   source  = "terraform-aws-modules/security-group/aws"
@@ -82,4 +78,7 @@ module "app_instance_private" {
       source_security_group_id = module.web_server_sg.security_group_id
     }
   ]
+  tags = merge(local.preparedTags, {
+    Role = "app-instance"
+  })
 }
