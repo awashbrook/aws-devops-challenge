@@ -32,7 +32,7 @@ module "ec2-application-instance" {
   version = "~> 3.0"
 
   name                   = "${var.app_tag}-${var.environment}-app-instance"
-  ami                    = var.AMIS[var.AWS_REGION] # TODO AMIfrom Data Source
+  ami                    = var.AMIS[var.AWS_REGION]
   instance_type          = var.instance_type
   key_name               = aws_key_pair.mykeypair.key_name
   monitoring             = true
@@ -42,6 +42,23 @@ module "ec2-application-instance" {
 
   tags = merge(local.preparedTags, {
     Role = "app-instance"
+  })
+}
+module "ec2-web-server" {
+  source  = "terraform-aws-modules/ec2-instance/aws"
+  version = "~> 3.0"
+
+  name                   = "${var.app_tag}-${var.environment}-web-server"
+  ami                    = var.AMIS[var.AWS_REGION]
+  instance_type          = var.instance_type
+  key_name               = aws_key_pair.mykeypair.key_name
+  monitoring             = true
+  vpc_security_group_ids = [module.web_server_sg.security_group_id]
+  subnet_id              = module.vpc_application.public_subnets[0]
+  # user_data              = data.template_cloudinit_config.cloudinit-app-instance.rendered
+
+  tags = merge(local.preparedTags, {
+    Role = "web-server"
   })
 }
 module "web_server_sg" {

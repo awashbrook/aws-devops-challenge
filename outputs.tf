@@ -18,3 +18,9 @@ output "private_subnets_ids" {
   description = "List of IDs of private subnets"
   value       = module.vpc_application.private_subnets
 }
+output "web-server-public-ip" {
+  value = module.ec2-web-server.public_ip
+}
+output "app-server-private-ip" {
+  value = module.ec2-web-server.private_ip
+}
