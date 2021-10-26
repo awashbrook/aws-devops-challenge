@@ -37,7 +37,7 @@ module "ec2-application-instance" {
   instance_type          = var.instance_type
   key_name               = aws_key_pair.mykeypair.key_name
   monitoring             = true
-  vpc_security_group_ids = [aws_security_group.app_instance_private.id]
+  vpc_security_group_ids = [module.app_instance_private.security_group_id]
   subnet_id              = module.vpc_application.private_subnets[0]
   user_data              = data.template_cloudinit_config.cloudinit-app-instance.rendered
 
@@ -49,41 +49,34 @@ module "ec2-application-instance" {
     Role        = "app-instance"
   }
 }
-resource "aws_security_group" "example-instance" {
+module "web_server_sg" {
+  source  = "terraform-aws-modules/security-group/aws//modules/http-80"
+  version = "~> 4.4"
+
+  name        = "${var.app_tag}-${var.environment}-web-server-public"
+  description = "Security group for web-server with HTTP and SSH ports open within VPC"
   vpc_id      = module.vpc_application.vpc_id
-  name        = "allow-ssh"
-  description = "security group that allows ssh and all egress traffic"
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
 
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = [var.WORKSTATION_CIDR_BLOCK]
-  }
+  ingress_cidr_blocks = [var.WORKSTATION_CIDR_BLOCK]
+
+  ingress_rules = ["ssh-tcp"]
 }
+module "app_instance_private" {
+  source  = "terraform-aws-modules/security-group/aws"
+  version = "~> 4.4"
 
+  name        = "${var.app_tag}-${var.environment}-app-instance-private"
+  description = "Security group for private instance app server HTTP 8080 ports open within VPC"
+  vpc_id      = module.vpc_application.vpc_id
 
-resource "aws_security_group" "app_instance_private" {
-  vpc_id = module.vpc_application.vpc_id
-  name   = "${var.app_tag}-${var.environment}-app-instance-sg"
-  ingress {
-    from_port       = 8080
-    to_port         = 8080
-    protocol        = "tcp"
-    security_groups = [aws_security_group.example-instance.id] # allowing access from our example instance
-  }
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-    self        = true
-  }
+  ingress_with_source_security_group_id = [
+    {
+      rule                     = "http-8080-tcp"
+      source_security_group_id = module.web_server_sg.security_group_id
+    },
+    {
+      rule                     = "ssh-tcp"
+      source_security_group_id = module.web_server_sg.security_group_id
+    }
+  ]
 }
-
