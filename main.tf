@@ -13,7 +13,7 @@ module "vpc_application" {
   name = "${var.app_tag}-${var.environment}-vpc"
   cidr = var.vpc_cidr_application
 
-  azs             = ["eu-west-1a", "eu-west-1b", "eu-west-1c"]
+  azs             = ["eu-west-2a", "eu-west-2b", "eu-west-2c"] # TODO AZ from Data Source
   private_subnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
   public_subnets  = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
 
@@ -33,7 +33,7 @@ module "ec2-application-instance" {
   version = "~> 3.0"
 
   name                   = "${var.app_tag}-${var.environment}-app-instance"
-  ami                    = var.AMIS[var.AWS_REGION]
+  ami                    = var.AMIS[var.AWS_REGION] # TODO AMIfrom Data Source
   instance_type          = var.instance_type
   key_name               = aws_key_pair.mykeypair.key_name
   monitoring             = true
