@@ -27,24 +27,7 @@ module "vpc_application" {
     Role = "app-vpc"
   })
 }
-module "ec2-application-instance" {
-  source  = "terraform-aws-modules/ec2-instance/aws"
-  version = "~> 3.0"
-
-  name                   = "${var.app_tag}-${var.environment}-app-instance"
-  ami                    = var.AMIS[var.AWS_REGION]
-  instance_type          = var.instance_type
-  key_name               = aws_key_pair.mykeypair.key_name
-  monitoring             = true
-  vpc_security_group_ids = [module.app_instance_private.security_group_id]
-  subnet_id              = module.vpc_application.private_subnets[0]
-  user_data              = data.template_cloudinit_config.cloudinit-app-instance.rendered
-
-  tags = merge(local.preparedTags, {
-    Role = "app-instance"
-  })
-}
-module "ec2-web-server" {
+module "ec2_web_server" {
   source  = "terraform-aws-modules/ec2-instance/aws"
   version = "~> 3.0"
 
@@ -53,15 +36,32 @@ module "ec2-web-server" {
   instance_type          = var.instance_type
   key_name               = aws_key_pair.mykeypair.key_name
   monitoring             = true
-  vpc_security_group_ids = [module.web_server_sg.security_group_id]
+  vpc_security_group_ids = [module.web_server_public_sg.security_group_id]
   subnet_id              = module.vpc_application.public_subnets[0]
-  # user_data              = data.template_cloudinit_config.cloudinit-app-instance.rendered
+  user_data              = data.template_cloudinit_config.cloudinit-web-server.rendered
 
   tags = merge(local.preparedTags, {
     Role = "web-server"
   })
 }
-module "web_server_sg" {
+module "ec2_application_instance" {
+  source  = "terraform-aws-modules/ec2-instance/aws"
+  version = "~> 3.0"
+
+  name                   = "${var.app_tag}-${var.environment}-app-instance"
+  ami                    = var.AMIS[var.AWS_REGION]
+  instance_type          = var.instance_type
+  key_name               = aws_key_pair.mykeypair.key_name
+  monitoring             = true
+  vpc_security_group_ids = [module.app_instance_private_sg.security_group_id]
+  subnet_id              = module.vpc_application.private_subnets[0]
+  user_data              = data.template_cloudinit_config.cloudinit-app-instance.rendered
+
+  tags = merge(local.preparedTags, {
+    Role = "app-instance"
+  })
+}
+module "web_server_public_sg" {
   source  = "terraform-aws-modules/security-group/aws//modules/http-80"
   version = "~> 4.4"
 
@@ -77,7 +77,7 @@ module "web_server_sg" {
     Role = "web-server"
   })
 }
-module "app_instance_private" {
+module "app_instance_private_sg" {
   source  = "terraform-aws-modules/security-group/aws"
   version = "~> 4.4"
 
@@ -88,11 +88,11 @@ module "app_instance_private" {
   ingress_with_source_security_group_id = [
     {
       rule                     = "http-8080-tcp"
-      source_security_group_id = module.web_server_sg.security_group_id
+      source_security_group_id = module.web_server_public_sg.security_group_id
     },
     {
       rule                     = "ssh-tcp"
-      source_security_group_id = module.web_server_sg.security_group_id
+      source_security_group_id = module.web_server_public_sg.security_group_id
     }
   ]
   tags = merge(local.preparedTags, {
