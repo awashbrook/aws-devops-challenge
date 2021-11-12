@@ -1,6 +1,6 @@
-variable "WORKSTATION_CIDR_BLOCK" {}
+variable "workstation_cidr_block" {}
 variable "AWS_REGION" {
-  default = "eu-west-2"
+  default = "eu-west-1"
 }
 variable "app_tag" {
   default = "devops"
