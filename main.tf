@@ -69,7 +69,7 @@ module "web_server_public_sg" {
   description = "Security group for web-server with HTTP and SSH ports open within VPC"
   vpc_id      = module.vpc_application.vpc_id
 
-  ingress_cidr_blocks = [var.WORKSTATION_CIDR_BLOCK]
+  ingress_cidr_blocks = [var.workstation_cidr_block]
 
   ingress_rules = ["ssh-tcp"]
 
