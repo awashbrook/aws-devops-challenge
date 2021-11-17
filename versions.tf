@@ -1,10 +1,10 @@
 terraform {
   required_version = ">= 0.13.1"
   backend "remote" {
-      organization = "andywash-devops"
-      workspaces {
-        name = "aws-devops-challenge"
-      }
+    organization = "andywash-devops"
+    workspaces {
+      name = "aws-devops-challenge"
+    }
   }
   required_providers {
     aws = {

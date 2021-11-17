@@ -6,9 +6,6 @@ locals {
     Version     = "0.1.0"
   }
 }
-data "aws_availability_zones" "available" {
-  state = "available"
-}
 module "vpc_application" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "~>3.10"
@@ -32,7 +29,7 @@ module "ec2_web_server" {
   version = "~> 3.0"
 
   name                   = "${var.app_tag}-${var.environment}-web-server"
-  ami                    = var.AMIS[var.AWS_REGION]
+  ami                    = data.aws_ami.amazon_linux_2
   instance_type          = var.instance_type
   key_name               = aws_key_pair.mykeypair.key_name
   monitoring             = true
