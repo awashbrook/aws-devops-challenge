@@ -29,7 +29,7 @@ module "ec2_web_server" {
   version = "~> 3.0"
 
   name                   = "${var.app_tag}-${var.environment}-web-server"
-  ami                    = data.aws_ami.amazon_linux_2
+  ami                    = data.aws_ami.amazon_linux_2.image_id
   instance_type          = var.instance_type
   key_name               = aws_key_pair.mykeypair.key_name
   monitoring             = true
