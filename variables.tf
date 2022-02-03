@@ -27,11 +27,14 @@ variable "instance_type" {
   # default = "t2.micro"
   default = "t3.nano"
 }
-# variable "PATH_TO_PRIVATE_KEY" {
-#   TODO
-# }
-variable "PUBLIC_KEY" {
+variable "PATH_TO_PRIVATE_KEY" {
+  default = "~/.ssh/mykey"
 }
+
+variable "PATH_TO_PUBLIC_KEY" {
+  default = "~/.ssh/mykey.pub"
+}
+
 variable "INSTANCE_USERNAME" {
   default = "ec2-user"
 }

@@ -4,6 +4,6 @@ terraform.tfstate.backup
 .terraform
 tf.plan
 tf.plan.txt
-destroy.plan
-destroy.plan.txt
+destroy.tfplan
+destroy.tfplan.txt
 .terraform.tfstate.lock.info
