@@ -41,23 +41,6 @@ module "ec2_web_server" {
     Role = "web-server"
   })
 }
-module "ec2_application_instance" {
-  source  = "terraform-aws-modules/ec2-instance/aws"
-  version = "~> 3.0"
-
-  name                   = "${var.app_tag}-${var.environment}-app-instance"
-  ami                    = var.AMIS[var.AWS_REGION]
-  instance_type          = var.instance_type
-  key_name               = aws_key_pair.mykeypair.key_name
-  monitoring             = true
-  vpc_security_group_ids = [module.app_instance_private_sg.security_group_id]
-  subnet_id              = module.vpc_application.private_subnets[0]
-  user_data              = data.template_cloudinit_config.cloudinit-app-instance.rendered
-
-  tags = merge(local.preparedTags, {
-    Role = "app-instance"
-  })
-}
 module "web_server_public_sg" {
   source  = "terraform-aws-modules/security-group/aws//modules/http-80"
   version = "~> 4.4"
@@ -74,25 +57,62 @@ module "web_server_public_sg" {
     Role = "web-server"
   })
 }
-module "app_instance_private_sg" {
-  source  = "terraform-aws-modules/security-group/aws"
-  version = "~> 4.4"
 
-  name        = "${var.app_tag}-${var.environment}-app-instance-private"
-  description = "Security group for private instance app server HTTP 8080 ports open within VPC"
+module "lb_security_group" {
+  source  = "terraform-aws-modules/security-group/aws//modules/web"
+  version = "3.17.0"
+
+  name        = "lb-sg"
+  description = "Security group for load balancer with HTTP ports open within VPC"
   vpc_id      = module.vpc_application.vpc_id
 
-  ingress_with_source_security_group_id = [
-    {
-      rule                     = "http-8080-tcp"
-      source_security_group_id = module.web_server_public_sg.security_group_id
-    },
-    {
-      rule                     = "ssh-tcp"
-      source_security_group_id = module.web_server_public_sg.security_group_id
+  ingress_cidr_blocks = ["0.0.0.0/0"]
+}
+
+data "aws_ami" "amazon_linux" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
+  }
+}
+
+
+resource "random_pet" "app" {
+  length    = 2
+  separator = "-"
+}
+
+resource "aws_lb" "app" {
+  name               = "main-app-${random_pet.app.id}-lb"
+  internal           = false
+  load_balancer_type = "application"
+  subnets            = module.vpc_application.public_subnets
+  security_groups    = [module.lb_security_group.this_security_group_id]
+}
+
+resource "aws_lb_listener" "app" {
+  load_balancer_arn = aws_lb.app.arn
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    type = "forward"
+    forward {
+      target_group {
+        arn    = aws_lb_target_group.blue.arn
+        weight = lookup(local.traffic_dist_map[var.traffic_distribution], "blue", 100)
+      }
+      target_group {
+        arn    = aws_lb_target_group.green.arn
+        weight = lookup(local.traffic_dist_map[var.traffic_distribution], "green", 0)
+      }
+      stickiness {
+        enabled  = false
+        duration = 1
+      }
     }
-  ]
-  tags = merge(local.preparedTags, {
-    Role = "app-instance"
-  })
+  }
 }

@@ -21,6 +21,6 @@ output "private_subnets_ids" {
 output "web_server_public_ip" {
   value = module.ec2_web_server.public_ip
 }
-output "app_server_private_ip" {
-  value = module.ec2_application_instance.private_ip
+output "lb_dns_name" {
+  value = aws_lb.app.dns_name
 }
