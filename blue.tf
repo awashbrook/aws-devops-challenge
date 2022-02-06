@@ -1,3 +1,4 @@
+# Blue YAML contains ALL resources REPLACED by Terraform as you dynamically orchestrate your infra and application deployments
 resource "aws_instance" "blue" {
   count = var.enable_blue_env ? var.blue_instance_count : 0
 
