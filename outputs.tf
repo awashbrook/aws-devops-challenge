@@ -28,3 +28,6 @@ output "web_server_public_ip" {
 output "lb_dns_name" {
   value = aws_lb.app.dns_name
 }
+output "lb_sg_ids" {
+  value = module.lb_security_group.security_group_id
+}

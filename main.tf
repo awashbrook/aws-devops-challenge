@@ -50,6 +50,7 @@ module "web_server_public_sg" {
   vpc_id      = module.vpc_application.vpc_id
 
   ingress_cidr_blocks = module.vpc_application.public_subnets_cidr_blocks
+  # security_groups = [module.lb_security_group.security_group_id]
 
   ingress_rules = ["ssh-tcp"]
 
@@ -60,7 +61,7 @@ module "web_server_public_sg" {
 
 module "lb_security_group" {
   source  = "terraform-aws-modules/security-group/aws//modules/web"
-  version = "3.17.0"
+  version = "~> 4.4"
 
   name        = "lb-sg"
   description = "Security group for load balancer with HTTP ports open within VPC"
@@ -91,7 +92,7 @@ resource "aws_lb" "app" {
   internal           = false
   load_balancer_type = "application"
   subnets            = module.vpc_application.public_subnets
-  security_groups    = [module.lb_security_group.this_security_group_id]
+  security_groups    = [module.lb_security_group.security_group_id]
 }
 
 resource "aws_lb_listener" "app" {
