@@ -1,3 +1,4 @@
+# Green YAML contains ALL resources REPLACED by Terraform as you dynamically orchestrate your infra and application deployments
 resource "aws_instance" "green" {
   count = var.enable_green_env ? var.green_instance_count : 0
 
@@ -6,7 +7,7 @@ resource "aws_instance" "green" {
   subnet_id              = module.vpc_application.public_subnets[count.index % length(module.vpc_application.public_subnets)]
   vpc_security_group_ids = [module.web_server_public_sg.security_group_id]
   user_data = templatefile("${path.module}/init-script.sh", {
-    file_content = "version 1.1 - #${count.index}"
+    file_content = "version 1.3 - #${count.index}"
   })
 
   tags = {
