@@ -1,4 +1,3 @@
-variable "workstation_cidr_block" {}
 variable "AWS_REGION" {
   default = "eu-west-1"
 }
@@ -13,6 +12,11 @@ variable "vpc_cidr_application" {
 }
 variable "vpc_cidr_bastion" {
   default = "172.168.0.0/16"
+}
+variable "admin_cidr_block" {
+  description = "Please specify a more specific actual admin public Administration CIDR Block"
+  type        = string
+  default     = "0.0.0.0/0"
 }
 # Free Tier Eligible 
 variable "instance_type" {
@@ -86,5 +90,5 @@ locals {
 variable "traffic_distribution" {
   description = "Levels of traffic distribution"
   type        = string
-  default = "green"
+  default     = "green"
 }

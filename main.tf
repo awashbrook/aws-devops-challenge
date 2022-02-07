@@ -67,7 +67,7 @@ module "lb_security_group" {
   description = "Security group for load balancer with HTTP ports open within VPC"
   vpc_id      = module.vpc_application.vpc_id
 
-  # TBD ingress_cidr_blocks = [var.workstation_cidr_block]
+  # TODO SSH  ingress_cidr_blocks = [var.admin_cidr_block]
   ingress_cidr_blocks = ["0.0.0.0/0"]
 }
 
