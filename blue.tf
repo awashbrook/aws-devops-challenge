@@ -2,7 +2,7 @@
 resource "aws_instance" "blue" {
   count = var.enable_blue_env ? var.blue_instance_count : 0
 
-  ami                    = data.aws_ami.amazon_linux.id
+  ami                    = data.aws_ami.amazon_linux_2.id
   instance_type          = var.instance_type
   subnet_id              = module.vpc_application.public_subnets[count.index % length(module.vpc_application.public_subnets)]
   vpc_security_group_ids = [module.web_server_public_sg.security_group_id]
