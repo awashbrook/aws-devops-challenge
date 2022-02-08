@@ -12,9 +12,8 @@
 #   })
 # }
 
-# TODO rename example > green
-resource "aws_launch_template" "example-launchtemplate" {
-  name          = "example-launchtemplate"
+resource "aws_launch_template" "green-launchtemplate" {
+  name          = "green-launchtemplate"
   image_id      = data.aws_ami.amazon_linux_2.image_id
   instance_type = var.instance_type
   key_name      = aws_key_pair.mykeypair.key_name
@@ -32,11 +31,11 @@ resource "aws_launch_template" "example-launchtemplate" {
   }
 }
 
-resource "aws_autoscaling_group" "example-autoscaling" {
-  name                = "example-autoscaling"
+resource "aws_autoscaling_group" "green-autoscaling" {
+  name                = "green-autoscaling"
   vpc_zone_identifier = module.vpc_application.public_subnets
   launch_template {
-    id      = aws_launch_template.example-launchtemplate.id
+    id      = aws_launch_template.green-launchtemplate.id
     version = "$Latest"
   }
   min_size                  = var.green_instance_count
